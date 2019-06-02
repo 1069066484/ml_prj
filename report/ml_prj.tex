@@ -1,0 +1,65 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{diagbox}
+\usepackage{subfigure}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Report of Machine Learning Project\\
+%{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
+%should not be used}
+%\thanks{Identify applicable funding agency here. If none, delete this.}
+}
+
+\author{
+\IEEEauthorblockN{Zhixin Lin}
+\IEEEauthorblockA{\textit{516021910495} \\
+\textit{Shanghai Jiao Tong University}\\
+Shanghai, China \\
+1069066484@qq.com}
+
+\and
+
+\IEEEauthorblockN{Yifeng Gao}
+\IEEEauthorblockA{\textit{0000000000} \\
+\textit{Shanghai Jiao Tong University}\\
+Shanghai, China \\
+gaoyifengsmail}
+
+
+
+}
+
+\maketitle
+
+\section{Main Ideas}
+In this project we use deep methods to perform classification work on Fer2013 dataset. We try different network architectures and select network parameters that result in the best accuracy on the given public test set. Finally, we test our networks and parameters on the given private test set to investigate the performance. Also, we try cropping the head segment of the images first to eliminate some unnecessary noises to see whether the classification can improve.
+
+We find networks of ResNet18 and VGG19 achieve the best performance on the given private test dataset with the selected parameters without head cropping. The best resulted accuracy reaches 0.73. With head cropping, the overall resulted accuracies reduce by about 0.03. However, on several classes, the resulted classification accuracies improved
+\section{Methods}
+Methods.
+
+\section{Algorithms}
+Algorithms.
+
+\section{Experimental Settings}
+Experimental Settings.
+
+\section{Results}
+Results.
+
+
+\end{document}
+
+
+
+
+
