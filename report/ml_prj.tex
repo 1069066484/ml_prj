@@ -1,10 +1,12 @@
-\documentclass[conference]{IEEEtran}
+%\documentclass[conference]{IEEEtran}
+\documentclass[journal, onecolumn]{IEEEtran}
 \IEEEoverridecommandlockouts
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
+\usepackage{caption}
 \usepackage{textcomp}
 \usepackage{diagbox}
 \usepackage{subfigure}
@@ -21,29 +23,11 @@
 \begin{document}
 
 \title{Report of Machine Learning Project\\
-%{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
-%should not be used}
-%\thanks{Identify applicable funding agency here. If none, delete this.}
+{\footnotesize Zhixin Ling, 516021910495  \quad  \quad  Yifeng Gao,0000000000000}
+\thanks{}
 }
 
-\author{
-\IEEEauthorblockN{Zhixin Ling}
-\IEEEauthorblockA{\textit{516021910495} \\
-\textit{Shanghai Jiao Tong University}\\
-Shanghai, China \\
-1069066484@qq.com}
 
-\and
-
-\IEEEauthorblockN{Yifeng Gao}
-\IEEEauthorblockA{\textit{0000000000} \\
-\textit{Shanghai Jiao Tong University}\\
-Shanghai, China \\
-gaoyifengsmail}
-
-
-
-}
 
 \maketitle
 
@@ -55,15 +39,37 @@ We find networks of ResNet18 and VGG19 achieve the best performance on the given
 \section{Methods}
 
 \subsection{LeNet}
-LeNet is a classical neural network. It is the first complete proposed neural network architecture, including convolution layers, pooling layers, fully connected layers and neuron activation mechanism. The network is simple but can be very effective for some requirements. LeNet's training needs far less computation compared with some later complicate networks. So, LeNet can always worth a try in our classification work.
+LeNet is a classical neural network. It is the first complete proposed neural network architecture, including convolution layers, pooling layers, fully connected layers and neuron activation mechanism. A typical version of LeNet is illustrated in \ref{fig:LeNetArch}. The network is simple but can be very effective for some requirements. LeNet's training needs far less computation compared with some later complicate networks. So, LeNet can always worth a try in our classification work.
+
 Compared with the first proposed version of LeNet, we use RELU instead of sigmoid function for neuron activation and also apply batch normalization to ensure a fast and stable convergence.
 
 \subsection{VGG}
-VGG, short for Visual Geometry Group Network, is far deeper than LeNet. More convolution kernels are applied; methods of neuron dropout and batch normalization are introduced; larger fully connected layers are used.
+VGG, short for Visual Geometry Group Network, is far deeper than LeNet. More convolution kernels are applied; methods of neuron dropout and batch normalization are introduced; larger fully connected layers are used. A typical version of VGG(VGG16) is illustrated in \ref{fig:VGGArch}.
 We try several architectures of VGG of different depths to explore whether a deeper network brings a better classification performance.
 
 \subsection{ResNet}
-ResNet, short for residual neural network, won the first prize in ILSRVC2015. The special feature of ResNet is that it creatively proposed shortcut connections that allow a former layer to have additional connections, bypassing adjacent layers, leading to the layers behind. The idea greatly ease decreasing of accuracies caused by increasing of network depths, thus allowing the network as deep as possible. As a result, ResNet have far more convolution layers than VGG and also bigger convolution kernels.
+ResNet, short for residual neural network, won the first prize in ILSRVC2015. The special feature of ResNet is that it creatively proposed shortcut connections that allow a former layer to have additional connections, bypassing adjacent layers, leading to the layers behind, as illustrated in \ref{fig:ResNetArch}. The idea greatly ease decreasing of accuracies caused by increasing of network depths, thus allowing the network as deep as possible. As a result, ResNet have far more convolution layers than VGG and also bigger convolution kernels.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.45\textwidth]{LeNet_the.jpg}
+  \caption{Typical Lenet Architecture}
+  \label{fig:LeNetArch}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.45\textwidth]{VGG_the.jpg}
+  \caption{VGG16 Architecture}
+  \label{fig:VGGArch}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.45\textwidth]{ResNet_the.jpg}
+  \caption{Residual Connections}
+  \label{fig:ResNetArch}
+\end{figure}
 
 \subsection{Face Detection And Cropping}
 The samples of our dataset are not all well collected. Faces in some images may be misplaced in a corner and the main contents of the image can be something uncorrelated to the classification work. So we try to detect the area in a image where the face exists and crop the area as a sample. The old image is discarded, of course.
@@ -73,19 +79,11 @@ For the work of face detection, we use traditional methods. We use a trained cla
 Data augmentation is used to enlarge the training dataset, creating more training samples, to make the trained model more robust and ease overfitting. Symmetry and random cropping are used for data augmentation.
 
 
-\begin{figure}
-  \centering
-  \includegraphics[width=.45\textwidth]{LeNet_the.jpg}
-  \caption{Theory of SA}
-  \label{SA_theorem}
-\end{figure}
-
-
 \section{Algorithms}
 
 \subsection{Preprocessing}
 Before training, we need to preprocess our data. This includes face detection and cropping, if required, and data augmentation. The algorithm is elaborated in \ref{alg:preprocessing}.
-        
+
 \begin{algorithm}
     \KwIn{ \\
     \quad An $b \times  m$ matrix $B$, a batch of raw data of size $b$. \\
@@ -154,8 +152,10 @@ Because of hardware limitations, we train our model in batches. And learning rat
 
 
 \section{Experimental Settings}
+
+\subsection{Convention of Notations}
 Before going on, we present our common notations to avoid confusion in table \ref{tab:notations}. The middle column Fixed Value indicates we have a fixed value for the parameter and we use $-$ to indicate the value is not fixed.
- \begin{table*}[h]
+ \begin{table}[h]
 	\centering
 	\caption{Convention of Notations}
 	\label{tab:notations}
@@ -179,8 +179,98 @@ Before going on, we present our common notations to avoid confusion in table \re
         $acc^{te}_{pri}(e)$ & - & Public test accuracy in a given epoch $e$. \\
 		\hline
 	\end{tabular}
-\end{table*}
+\end{table}
 
+\subsection{Detailed Network Structures}
+We conduct eight experiments with different settings on six different networks. We use LetNet5, VGG11, VGG13, VGG16, VGG19 and ResNet18, as shown in table \ref{tab:LeNet5-VGG} and figure \ref{fig:ResNet18}.  In table \ref{tab:LeNet5-VGG}, we denote a convolution layer as "conv<kernel size>-<kernel numbers>" and a fully connected layer as "FC-<neuron numbers>". RELU is used for neuron activation. Padding is applied with every convolution layers and batch normalization is used after convolution.
+
+Compared with the LeNet5 structure used for mnist digits classification, we adjust the fully connected layers to adapt to our dataset and apply batch normalization.
+
+Compared with standard VGG structures proposed by Karen Simonyan, et al., we, use only one fully connected layer("FC-512") after convolution layers except the output layer while Karen Simonyan, et al. use two 4096-neuron layers. We do not need such complicated fully connected layers because we have only seven classes while they have one thousand.
+
+Since ResNet is more difficult to describe, we turn to tensorboard for visualization. The detailed parameters are elaborated in \ref{tab:ResNet18}. We denote a convolution layer using $n$ $s$-sized kernels as ($s$, $n$) and $a$ sequenced building blocks composed of $k$ convolution layer as [($s_1$, $n_1$),($s_2$, $n_2$), $\cdots$, ($s_k$, $n_k$)] $\times a$. Within every building block, there is a residual connection from block input to block output, bypassing the contained convolution layers, as illustrated in the right block of figure \ref{fig:ResNet18}.
+
+For every fully connected layer, we drop out the neurons with a rate of $D_o=0.5$.
+
+\begin{table}
+%\Large
+\caption{Structures of LeNet5 and VGG}
+\label{tab:LeNet5-VGG}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c| p{5cm}|}
+\hline
+LeNet5 & VGG11      & VGG13         & VGG16     & VGG19  \\ \hline 
+input & input & input               & input & input  \\  
+conv5-6 & conv3-64   & conv3-64     & conv3-64  & conv3-64  \\
+maxpool & maxpool & conv3-64        & conv3-64 & conv3-64  \\  
+conv5-16 & conv3-128 & maxpool      & maxpool  & maxpool  \\  
+maxpool & maxpool & conv3-128       & conv3-128 & conv3-128  \\  
+FC-144 & conv3-256 & conv3-128      & conv3-128 & conv3-128  \\  
+FC-84 & conv3-256 & maxpool         & maxpool & maxpool  \\  
+FC-7 & maxpool & conv3-256          & conv3-256 & conv3-256  \\  
+soft-max & conv3-512 & conv3-256    & conv3-256 & conv3-256  \\
+ & conv3-512 & maxpool              & conv3-256 & conv3-256  \\  
+ & maxpool & conv3-512              & maxpool & conv3-256  \\  
+ & conv3-512 & conv3-512            & conv3-512 & maxpool  \\
+ & conv3-512 & maxpool              & conv3-512 & conv3-512  \\  
+ & maxpool & conv3-512              & conv3-512 & conv3-512  \\
+ & FC-512  & conv3-512              & maxpool & conv3-512  \\  
+ &FC-7 & maxpool                 & conv3-512 & conv3-512  \\  
+ & soft-max &    FC-512                & conv3-512 & maxpool  \\  
+ &  &  FC-7                & conv3-512 & conv3-512  \\   
+  &  &  soft-max                        & maxpool & conv3-512  \\
+   &  &                    & FC-512 & conv3-512  \\
+    &  &                            & FC-7 & conv3-512  \\  
+  &  &                          &      soft-max     & maxpool  \\
+   &  &                     &               & FC-512   \\
+    &  &                            &       & FC-7  \\  
+        &  &                        &       & soft-max \\  \hline 
+\end{tabular}
+\end{center}
+\end{table}  
+
+\begin{table}
+%\Large
+\caption{Structures of ResNet18}
+\label{tab:ResNet18}
+\begin{center}
+\begin{tabular}{|c|c| p{5cm}|}
+\hline
+Layer Name & Blocks    \\ \hline
+conv1 & (3,64)   \\
+conv2.x    & $[(3,128),(3,128)] \times 2$  \\  
+conv3.x    & $[(3,256),(3,256)] \times 2$  \\  
+conv4.x    & $[(3,512),(3,512)] \times 2$  \\  
+FC1    & FC-512  \\  
+output    & soft-max  \\   \hline
+\end{tabular}
+\end{center}
+\end{table}  
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{ResNet18_2.png}
+  \caption{Structures of ResNet18}
+  \label{fig:ResNet18}
+\end{figure}
+
+
+\subsection{Hyper-Parameters of Experiments}
+We conduct seven experiments regard of different networks, whether or not crop faces in preprocessing and the batch size used for training. The details are illustrated in table \ref{tab:Hps}.
+\begin{table}
+%\Large
+\caption{Hyper-Parameters of Experiments}
+\label{tab:Hps}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c| p{1.5cm}|}
+\hline
+Experiment Name & ExLenet5 & ExLenet5-DC & ExVGG11 & ExVGG13 & ExVGG16 & ExVGG19 & ExVGG19-DC & ExRes18    \\ \hline
+$F_{DC}$  & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark & $\times$  \\ \hline
+$b$    & 64 & 64 & 64 & 64 & 64 & 64 & 64 & 32  \\ \hline
+Network    & Lenet5 & Lenet5 & VGG11 & VGG13 & VGG16 & VGG19 & VGG19 & ResNet18  \\  \hline
+\end{tabular}
+\end{center}
+\end{table} 
 
 
 

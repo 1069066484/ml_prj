@@ -33,6 +33,9 @@ class VGG(nn.Module):
 
     def forward(self, input):
         out = self.features(input)
+        #torch.Size([64, 512, 1, 1])
+        #print(out.size())
+
         out = out.view(out.size(0), -1)
         out = functional.dropout(out, p=0.5, training=self.training)
         out = self.classifier(out)

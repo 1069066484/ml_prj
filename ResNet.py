@@ -13,9 +13,10 @@ import torch.nn.functional as functional
 class BasicBlock(nn.Module):
     expansion = 1
     def __init__(self, in_planes, planes, stride=1):
+        super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.CConv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
@@ -36,7 +37,7 @@ class ResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=7):
         super(ResNet, self).__init__()
         self.in_planes = 64
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, biad=False)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         ml = self._make_layer
         self.layer1 = ml(block, 64, num_blocks[0], stride=1)
@@ -54,10 +55,10 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, input):
-        out = functional.relu(self.bn1(self.conv1))
+        out = functional.relu(self.bn1(self.conv1(input)))
         for layer in [self.layer1, self.layer2, self.layer3, self.layer4]:
             out = layer(out)
-        out = functional.avg_poo2d(out, 4)
+        out = functional.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         out = functional.dropout(out, p=0.5, training=self.training)
         out = self.linear(out)

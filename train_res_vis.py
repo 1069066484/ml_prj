@@ -21,8 +21,8 @@ from Lglobal_defs import *
 from Ldata_helper import *
 from LeNet5 import LeNet5
 import utils
-
-
+from tensorboardX import SummaryWriter
+import ResNet
 
 
 def calcl_mat(pred, label, m=None):
@@ -78,10 +78,14 @@ pubT_loader = DataLoader(pubT_set, batch_size=batch_size, shuffle=False, num_wor
 priT_set = Fer2013Dataset(split='priT', transform=trans_te)
 priT_loader = DataLoader(priT_set, batch_size=batch_size, shuffle=False, num_workers=0)
 
-net_name = 'VGG11_'
+net_name = 'Res18'
 # net_name = 'LeNet5_cv1'
-# net = LeNet5()
-net = VGG.VGG(VGG.VGGType.VGG11)
+net = ResNet.ResNet18()
+dummy_input = torch.rand(2, 3, 44, 44)
+with SummaryWriter(comment='Res18') as w:
+    w.add_graph(net, (dummy_input, ))
+exit(-1)
+
 path = mk_dir(join(PATH_SAVING, 'training_log', net_name))
 
 
