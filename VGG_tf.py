@@ -34,7 +34,7 @@ def vgg19(inputs):
 
 
 def train(model, path_model, path_train_log, path_test_log):
-
+    pass
 
 
 if __name__=='__main__':
