@@ -76,7 +76,7 @@ The samples of our dataset are not all well collected. Faces in some images may 
 For the work of face detection, we use traditional methods. We use a trained classifier cascaded from strong subclassifiers trained with extracted Haar features of images using Adaboost algorithms.
 
 \subsection{Data Augmentation}
-Data augmentation is used to enlarge the training dataset, creating more training samples, to make the trained model more robust and ease overfitting. Symmetry and random cropping are used for data augmentation.
+Data augmentation is used to enlarge the training dataset, creating more training samples, to make the trained model more robust and ease overfitting. Symmetry and random cropping are used for data augmentation. That is, for a given training sample image, we flip the image randomly and crop it to a given size. For a test sample, we do not flip but only crop it.
 
 
 \section{Algorithms}
@@ -113,6 +113,8 @@ Before training, we need to preprocess our data. This includes face detection an
 
 \subsection{Network Training}
 Because of hardware limitations, we train our model in batches. And learning rate annealing is also applied to stabilize the convergence. After each epoch, we estimate the classification accuracy on the public test set and decide whether or not to save the current network parameters. The algorithm is elaborated in \ref{alg:NetworkTraining}.
+
+We use cross entropy as loss for back propagation. Compared to mean squared error, cross entropy suffers less from gradient vanishing and help greatly update of network parameters, especially for multi-class classification requirements.
 \begin{algorithm}
     \KwIn{ \\
     \quad $(X^{tr}, Y^{tr})$, the training set. \\
@@ -140,8 +142,8 @@ Because of hardware limitations, we train our model in batches. And learning rat
                 $\theta \leftarrow - l_r \times \frac{\partial loss}{\partial \theta}$\;
             }
             Calculate $q$ for all batches of $(X^{te}_{pub}, Y^{te}_{pub})$\;
-            $acc^{te}_{pub} \leftarrow \frac{1}{s^{te}_{pub}} \sum_{j} argmax(q_j) == Y^{te}_{pub,j} $, where $s^{te}_{pub}$ is total size of public training set\;
-            \If{$acc^{te}_{pub} > acc^{te*}_{pub}$}{
+            $acc^{te}_{pub} \leftarrow \frac{1}{s^{te}_{pub}} \sum_{j} (argmax(q_j) == Y^{te}_{pub,j}) $, where $s^{te}_{pub}$ is total size of public training set\;
+            \If{$acc^{te}_{pub} \geq acc^{te*}_{pub}$}{
                 $acc^{te*}_{pub} \leftarrow acc^{te}_{pub}$\;
                 $\theta^* \leftarrow \theta$\;
             }
@@ -174,6 +176,7 @@ Before going on, we present our common notations to avoid confusion in table \re
         $S_{tr}=(X^{tr}, Y^{tr})$ & \checkmark & Training set. \\
         $S_{pub}=(X^{te}_{pub}, Y^{te}_{pub})$ & \checkmark & Public test set. \\
         $S_{pri}=(X^{te}_{pri}, Y^{te}_{pri})$ & \checkmark & Private test set. \\
+        $e^*$ & - & The epoch when the best accuracy on public test set is last achieved. \\
         $acc^{tr}(e)$ & - & Training accuracy in a given epoch $e$. \\
         $acc^{te}_{pub}(e)$ & - & Private test accuracy in a given epoch $e$. \\
         $acc^{te}_{pri}(e)$ & - & Public test accuracy in a given epoch $e$. \\
@@ -199,35 +202,35 @@ For every fully connected layer, we drop out the neurons with a rate of $D_o=0.5
 \begin{center}
 \begin{tabular}{|c|c|c|c|c| p{5cm}|}
 \hline
-LeNet5 & VGG11      & VGG13         & VGG16     & VGG19  \\ \hline 
-input & input & input               & input & input  \\  
+LeNet5 & VGG11      & VGG13         & VGG16     & VGG19  \\ \hline
+input & input & input               & input & input  \\
 conv5-6 & conv3-64   & conv3-64     & conv3-64  & conv3-64  \\
-maxpool & maxpool & conv3-64        & conv3-64 & conv3-64  \\  
-conv5-16 & conv3-128 & maxpool      & maxpool  & maxpool  \\  
-maxpool & maxpool & conv3-128       & conv3-128 & conv3-128  \\  
-FC-144 & conv3-256 & conv3-128      & conv3-128 & conv3-128  \\  
-FC-84 & conv3-256 & maxpool         & maxpool & maxpool  \\  
-FC-7 & maxpool & conv3-256          & conv3-256 & conv3-256  \\  
+maxpool & maxpool & conv3-64        & conv3-64 & conv3-64  \\
+conv5-16 & conv3-128 & maxpool      & maxpool  & maxpool  \\
+maxpool & maxpool & conv3-128       & conv3-128 & conv3-128  \\
+FC-144 & conv3-256 & conv3-128      & conv3-128 & conv3-128  \\
+FC-84 & conv3-256 & maxpool         & maxpool & maxpool  \\
+FC-7 & maxpool & conv3-256          & conv3-256 & conv3-256  \\
 soft-max & conv3-512 & conv3-256    & conv3-256 & conv3-256  \\
- & conv3-512 & maxpool              & conv3-256 & conv3-256  \\  
- & maxpool & conv3-512              & maxpool & conv3-256  \\  
+ & conv3-512 & maxpool              & conv3-256 & conv3-256  \\
+ & maxpool & conv3-512              & maxpool & conv3-256  \\
  & conv3-512 & conv3-512            & conv3-512 & maxpool  \\
- & conv3-512 & maxpool              & conv3-512 & conv3-512  \\  
+ & conv3-512 & maxpool              & conv3-512 & conv3-512  \\
  & maxpool & conv3-512              & conv3-512 & conv3-512  \\
- & FC-512  & conv3-512              & maxpool & conv3-512  \\  
- &FC-7 & maxpool                 & conv3-512 & conv3-512  \\  
- & soft-max &    FC-512                & conv3-512 & maxpool  \\  
- &  &  FC-7                & conv3-512 & conv3-512  \\   
+ & FC-512  & conv3-512              & maxpool & conv3-512  \\
+ &FC-7 & maxpool                    & conv3-512 & conv3-512  \\
+ & soft-max &    FC-512                & conv3-512 & maxpool  \\
+ &  &  FC-7                         & conv3-512 & conv3-512  \\
   &  &  soft-max                        & maxpool & conv3-512  \\
-   &  &                    & FC-512 & conv3-512  \\
-    &  &                            & FC-7 & conv3-512  \\  
+   &  &                             & FC-512 & conv3-512  \\
+    &  &                            & FC-7 & conv3-512  \\
   &  &                          &      soft-max     & maxpool  \\
    &  &                     &               & FC-512   \\
-    &  &                            &       & FC-7  \\  
-        &  &                        &       & soft-max \\  \hline 
+    &  &                            &       & FC-7  \\
+        &  &                        &       & soft-max \\  \hline
 \end{tabular}
 \end{center}
-\end{table}  
+\end{table}
 
 \begin{table}
 %\Large
@@ -238,14 +241,14 @@ soft-max & conv3-512 & conv3-256    & conv3-256 & conv3-256  \\
 \hline
 Layer Name & Blocks    \\ \hline
 conv1 & (3,64)   \\
-conv2.x    & $[(3,128),(3,128)] \times 2$  \\  
-conv3.x    & $[(3,256),(3,256)] \times 2$  \\  
-conv4.x    & $[(3,512),(3,512)] \times 2$  \\  
-FC1    & FC-512  \\  
+conv2.x    & $[(3,128),(3,128)] \times 2$  \\
+conv3.x    & $[(3,256),(3,256)] \times 2$  \\
+conv4.x    & $[(3,512),(3,512)] \times 2$  \\
+FC1    & FC-512  \\
 output    & soft-max  \\   \hline
 \end{tabular}
 \end{center}
-\end{table}  
+\end{table}
 
 \begin{figure}
   \centering
@@ -256,7 +259,7 @@ output    & soft-max  \\   \hline
 
 
 \subsection{Hyper-Parameters of Experiments}
-We conduct seven experiments regard of different networks, whether or not crop faces in preprocessing and the batch size used for training. The details are illustrated in table \ref{tab:Hps}.
+We conduct eight experiments regard of different networks, whether or not crop faces in preprocessing and the batch size used for training. The details are illustrated in table \ref{tab:Hps}.
 \begin{table}
 %\Large
 \caption{Hyper-Parameters of Experiments}
@@ -267,16 +270,130 @@ We conduct seven experiments regard of different networks, whether or not crop f
 Experiment Name & ExLenet5 & ExLenet5-DC & ExVGG11 & ExVGG13 & ExVGG16 & ExVGG19 & ExVGG19-DC & ExRes18    \\ \hline
 $F_{DC}$  & $\times$ & \checkmark & $\times$ & $\times$ & $\times$ & $\times$ & \checkmark & $\times$  \\ \hline
 $b$    & 64 & 64 & 64 & 64 & 64 & 64 & 64 & 32  \\ \hline
-Network    & Lenet5 & Lenet5 & VGG11 & VGG13 & VGG16 & VGG19 & VGG19 & ResNet18  \\  \hline
+Network    & LeNet5 & LeNet5 & VGG11 & VGG13 & VGG16 & VGG19 & VGG19 & ResNet18  \\  \hline
 \end{tabular}
 \end{center}
-\end{table} 
+\end{table}
 
 
 
 \section{Results}
-Results.
+In this part, we'll first show an overview of our results in table \ref{tab:Result-overview}. Among the eight experiments, ExRes18 achieve $acc^{te}_{pri}(e^*)=0.73$. $acc^{te}_{pri}(e^*)$ of all experiments except the two that use LeNet5 reach 0.70, the state-of-art result. Besides, in all experiments, there is a phenomena that $acc^{te}_{pub}(e^*) \leq acc^{te}_{pri}(e^*)$. The reason could be that joint distribution of $S_{pri}$,$P(X^{te}_{pri}, Y^{te}_{pri})$, is more close to distribution of $S_{tr}$,$P(X^{tr}, Y^{tr})$, than that of $S_{pub}$,$P(X^{te}_{pub}, Y^{te}_{pub})$. And we can conclude from the low $acc^{tr}(e^*)$ from ExLenet5 and ExLenet5-DC that LeNet5 structure is too simple to classify the our face expression dataset. The underfitting is very obvious. By observing and comparing results of ExLenet5 and ExLenet5-DC, ExVGG19 and ExVGG19-DC, the face detection and cropping, to our disappointment, lowers the $acc^{te}_{pri}(e^*)$ by about 0.01. The face detection and cropping doesn't help. And, it is unlikely that increasing depth of VGG networks can necessarily bring improvement on the network's performance.
+\begin{table}
+%\Large
+\caption{An Overview of Experiment Results}
+\label{tab:Result-overview}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c| p{1.5cm}|}
+\hline
+Experiment Name & ExLenet5 & ExLenet5-DC & ExVGG11 & ExVGG13 & ExVGG16 & ExVGG19 & ExVGG19-DC & ExRes18    \\ \hline
+$e^*$  & 249 & 250 & 204 & 196 & 193 & 249 & 250 & 170  \\ \hline
+$acc^{tr}(e^*)$    & 0.68 & 0.68 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99  \\ \hline
+$acc^{te}_{pub}(e^*)$    & 0.63 & 0.62 & 0.70 & 0.71 & 0.71 & 0.71 & 0.69 & 0.71  \\ \hline
+$acc^{te}_{pri}(e^*)$    & 0.64 & 0.63 & 0.71 & 0.72 & 0.71 & 0.72 & 0.71 & 0.73  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
+
+Now, we present private test accuracy confusion matrix of some experiments. For a confusion matrix $M$, each element $M_{i,j}$ denotes the ratio of samples belonging to class $i$ classified into class $j$, where $i,j=1,2,3,4,5,6,7$, representing expression of angry, disgust, fear, happy, sad, surprise and neutral respectively.
+
+Comparing confusion matrices of ExVGG19 and ExVGG19-DC in \ref{eq:conf-VGG19} and \ref{eq:conf-VGG19-DC}, ExVGG19-DC is not so frustrating since classification accuracies of VGG19-DC on class 5 and class 6 overcome those of ExVGG19 by 0.05 and 0.02 respectively. 
+
+We think each experiment configuration has its own advantages. But all of them do best in class 6(surprise) and do worst in class 3(fear). we have opinions as follow:
+\begin{enumerate}
+  \item Our model may not be complicated enough to recognize expression of fear. And fear is the most undistinguished among all expressions. Actually, even in the training samples of class 3, the classification error is also the highest.
+  \item The samples may be mislabeled. Even human can sometimes misunderstand face expressions.
+\end{enumerate}
+
+Finally, we place the training histories of our experiments in \ref{fig:hists}. We have discoveries as follow:
+\begin{enumerate}
+  \item  By observing the figures, we find we do not always select the best $e^*$ for the best $acc^{te}_{pri}(e^*)$. For example, there are several moments when $acc^{te}_{pri}(e^*)$ reach 0.73 during the training of ExVGG19 but our rule of selecting network parameters just failed to grab those moments. We have to admit that there are some error in our codes so that we failed to record the accuracies as precise as possible.
+  \item It is discovered that loss curves using LeNet5 are more unstable, especially when using face cropping for preprocessing. 
+  \item Except the two experiments using LeNet5, test losses of all experiments first decrease and the increase while training losses are always decreasing. The three curves intersect at roughly one point. Before the point, training accuracies and test accuracies increase quickly and consistently, while, after the point, training accuracies still continue the old trend but test accuracies improve slowly.
+\end{enumerate}
+  
+\begin{equation}  
+\label{eq:conf-VGG19}    
+M(ExVGG19)=
+\left(                 
+  \begin{array}{ccccccc}  
+    0.6191&0.0102&0.1141&0.0305&0.1161&0.0163&0.0937\\
+    0.1818&0.7273&0.0545&0.0182&0.&0.&0.0182\\
+    0.0909&0.&0.5852&0.0303&0.1515&0.0606&0.0814\\
+    0.0148&0.&0.0114&0.9101&0.0205&0.0159&0.0273\\
+    0.101&0.&0.1279&0.0303&0.5707&0.0034&0.1667\\
+    0.0192&0.0024&0.0986&0.0312&0.0144&0.8101&0.0240\\
+    0.0447&0.0016&0.0495&0.0367&0.1262&0.008&0.7332\\
+  \end{array}
+\right)                 
+\end{equation}
+
+\begin{equation}
+\label{eq:conf-VGG19-DC}
+M(VGG19DC)=
+\left(
+  \begin{array}{ccccccc}
+    0.6191&0.0061&0.112&0.0224&0.1365&0.0163&0.0876\\
+    0.1818&0.7091&0.0364&0.0364&0.&0.0182&0.0182\\
+    0.0985&0.&0.5587&0.0303&0.1496&0.0644&0.0985\\
+    0.0171&0.&0.0159&0.8919&0.025&0.0171&0.0330\\
+    0.0774&0.0017&0.1077&0.0539&0.6229&0.0051&0.1313\\
+    0.0192&0.&0.0769&0.0337&0.0168&0.8341&0.0192\\
+    0.0415&0.0016&0.0511&0.0415&0.1534&0.0112&0.6997\\
+      \end{array}
+\right)
+\end{equation}
+
+\begin{equation}
+\label{eq:conf-Res18}
+M(Res18)=
+\left(
+  \begin{array}{ccccccc}
+    0.6558&0.0041&0.1018&0.0204&0.1161&0.0122&0.0896\\
+    0.1636&0.7273&0.0364&0.0364&0.&0.0182&0.0182\\
+    0.0966&0.0038&0.5795&0.0246&0.1383&0.0606&0.0966\\
+    0.0148&0.0011&0.0171&0.8942&0.0171&0.0148&0.041\\
+    0.0741&0.&0.1229&0.0269&0.6128&0.0034&0.1599\\
+    0.0144&0.&0.0817&0.0312&0.024&0.8317&0.0168\\
+    0.0351&0.0016&0.0495&0.0415&0.1182&0.0096&0.7444\\
+      \end{array}
+\right)
+\end{equation}
+
+
+\begin{figure*}[htb]
+\centering
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{LeNet5.png}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{LeNet5_cv1.png}
+\end{minipage}%
+
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{VGG11.png}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{VGG13.png}
+\end{minipage}%
+
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{VGG16.png}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{VGG19.png}
+\end{minipage}%
+
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{VGG19_cv1.png}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=3.5in, height=2.5in]{Res18.png}
+\end{minipage}%
+
+\caption{Visualization of Training Histories}\label{fig:hists}
+\end{figure*}
 
 \end{document}
 

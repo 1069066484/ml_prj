@@ -61,7 +61,7 @@ hists = [[],[],[],[],[],[]]
 
 
 trans_tr = transforms.Compose([
-    transforms.RandomCrop(44),
+    transforms.RandomCrop(cut_size),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor()
     ])

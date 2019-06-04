@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from functools import reduce
 
 
-do_print_acc = False
+do_print_acc = True
 
 
 def show_class_mat(net_name):
@@ -24,6 +24,10 @@ def show_class_mat(net_name):
         if not do_print_acc:
             print(mat[i])
         else:
+            if i == 0:
+                for j in range(len(mat[i])):
+                    print(np.sum(mat[0][j]))
+                exit(1)
             np.set_printoptions(precision=4)
             mat = np.asarray(mat, dtype=np.float)
             for j in range(len(mat[i])):
@@ -37,6 +41,7 @@ def show_hists(top_dir, net_name):
     path = join(PATH_SAVING, 'training_log', net_name, npfn('hist'))
     hists = np.load(path)
     epochs = range(1, len(hists[0])+1)
+
     hists[1] /= 100.0
     hists[3] /= 100.0
     hists[5] /= 100.0
@@ -47,15 +52,19 @@ def show_hists(top_dir, net_name):
     lines.append(ax1.plot(epochs, hists[0], '--', linewidth=1, color='b', label='training loss'))
     lines.append(ax1.plot(epochs, hists[2], '--', linewidth=1, color='r', label='public test loss'))
     lines.append(ax1.plot(epochs, hists[4], '--', linewidth=1, color='k', label='private test loss'))
-    idx = np.argmax(hists[3])
+
+    l = list(hists[3])
+    # l.reverse()
+    idx = len(l) - 1 - np.argmax(l)
+
     np.set_printoptions(precision=4)
     print('At the end of training, training acc={}, public test acc={}, private test acc={}'.format \
           (hists[1][-1], hists[3][-1], hists[5][-1]))
-    print('With selected params, training acc={}, public test acc={}, private test acc={}'.format \
+    print('With selected params at epoch',idx+1,', training acc={}, public test acc={}, private test acc={}'.format \
           (hists[1][idx], hists[3][idx], hists[5][idx]))
     ax1.set_xlabel("epoch")
     ax1.set_ylabel("loss")
-    ax1.set_title('training history of ' + (net_name if not net_name.endswith("_cv1") else net_name[:-4] + "(head cropped)"))
+    ax1.set_title('training history of ' + (net_name if not net_name.endswith("_cv1") else net_name[:-4] + "(face cropped)"))
 
     ax2 = ax1.twinx()
     ax2.annotate(str(hists[5][idx]),(idx+1,hists[5][idx]))
@@ -76,7 +85,7 @@ if __name__=='__main__':
     for net_name in ['LeNet5', 'LeNet5_cv1', 'Res18', 'VGG11', 'VGG13', 'VGG16', 'VGG19', 'VGG19_cv1']:
         path = join(PATH_SAVING, 'training_log', net_name)
         print('\n\n',net_name + ":")
-        # show_class_mat(net_name)
+        #show_class_mat(net_name)
         show_hists(path, net_name)
         # exit(1)
 
