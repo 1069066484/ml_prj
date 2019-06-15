@@ -139,7 +139,7 @@ We use cross entropy as loss for back propagation. Compared to mean squared erro
                 Calculate array $q$ with $q_j \leftarrow f(\theta, X^{tr}_{i,j})$, where $j = 1,2,\cdots,b$ and $f$ denotes the function corresponding to the given network\;
                 $q \leftarrow softmax(q)$\;
                 $loss \leftarrow - \frac{1}{b}\sum_{j=1}^{b} Y^{tr}_{i,j} \log q_j$\;
-                $\theta \leftarrow - l_r \times \frac{\partial loss}{\partial \theta}$\;
+                $\theta \leftarrow \theta - l_r \times \frac{\partial loss}{\partial \theta}$\;
             }
             Calculate $q$ for all batches of $(X^{te}_{pub}, Y^{te}_{pub})$\;
             $acc^{te}_{pub} \leftarrow \frac{1}{s^{te}_{pub}} \sum_{j} (argmax(q_j) == Y^{te}_{pub,j}) $, where $s^{te}_{pub}$ is total size of public training set\;
@@ -298,7 +298,7 @@ $acc^{te}_{pri}(e^*)$    & 0.64 & 0.63 & 0.71 & 0.72 & 0.71 & 0.72 & 0.71 & 0.73
 
 Now, we present private test accuracy confusion matrix of some experiments. For a confusion matrix $M$, each element $M_{i,j}$ denotes the ratio of samples belonging to class $i$ classified into class $j$, where $i,j=1,2,3,4,5,6,7$, representing expression of angry, disgust, fear, happy, sad, surprise and neutral respectively.
 
-Comparing confusion matrices of ExVGG19 and ExVGG19-DC in \ref{eq:conf-VGG19} and \ref{eq:conf-VGG19-DC}, ExVGG19-DC is not so frustrating since classification accuracies of VGG19-DC on class 5 and class 6 overcome those of ExVGG19 by 0.05 and 0.02 respectively. 
+Comparing confusion matrices of ExVGG19 and ExVGG19-DC in \ref{eq:conf-VGG19} and \ref{eq:conf-VGG19-DC}, ExVGG19-DC is not so frustrating since classification accuracies of VGG19-DC on class 5 and class 6 overcome those of ExVGG19 by 0.05 and 0.02 respectively.
 
 We think each experiment configuration has its own advantages. But all of them do best in class 6(surprise) and do worst in class 3(fear). we have opinions as follow:
 \begin{enumerate}
@@ -309,15 +309,15 @@ We think each experiment configuration has its own advantages. But all of them d
 Finally, we place the training histories of our experiments in \ref{fig:hists}. We have discoveries as follow:
 \begin{enumerate}
   \item  By observing the figures, we find we do not always select the best $e^*$ for the best $acc^{te}_{pri}(e^*)$. For example, there are several moments when $acc^{te}_{pri}(e^*)$ reach 0.73 during the training of ExVGG19 but our rule of selecting network parameters just failed to grab those moments. We have to admit that there are some error in our codes so that we failed to record the accuracies as precise as possible.
-  \item It is discovered that loss curves using LeNet5 are more unstable, especially when using face cropping for preprocessing. 
+  \item It is discovered that loss curves using LeNet5 are more unstable, especially when using face cropping for preprocessing.
   \item Except the two experiments using LeNet5, test losses of all experiments first decrease and the increase while training losses are always decreasing. The three curves intersect at roughly one point. Before the point, training accuracies and test accuracies increase quickly and consistently, while, after the point, training accuracies still continue the old trend but test accuracies improve slowly.
 \end{enumerate}
-  
-\begin{equation}  
-\label{eq:conf-VGG19}    
+
+\begin{equation}
+\label{eq:conf-VGG19}
 M(ExVGG19)=
-\left(                 
-  \begin{array}{ccccccc}  
+\left(
+  \begin{array}{ccccccc}
     0.6191&0.0102&0.1141&0.0305&0.1161&0.0163&0.0937\\
     0.1818&0.7273&0.0545&0.0182&0.&0.&0.0182\\
     0.0909&0.&0.5852&0.0303&0.1515&0.0606&0.0814\\
@@ -326,7 +326,7 @@ M(ExVGG19)=
     0.0192&0.0024&0.0986&0.0312&0.0144&0.8101&0.0240\\
     0.0447&0.0016&0.0495&0.0367&0.1262&0.008&0.7332\\
   \end{array}
-\right)                 
+\right)
 \end{equation}
 
 \begin{equation}
