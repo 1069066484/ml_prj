@@ -1,6 +1,6 @@
 This is project of CS420-Machine Learning.
 
- 1. Different methods are used for Fer2013 dataset's classification.
+ 1. Different methods are used for Fer2013 dataset's classification. The finally achieved private test accuracy reaches 73%, the state-of-art record.
  
  2. The entrance script is 'train.py'; the codes train the model. 
  
